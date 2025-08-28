@@ -43,32 +43,38 @@
 // export default router;
 
 import express from "express";
-import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import fetch from "node-fetch";
 
-dotenv.config();
 const router = express.Router();
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post("/generate", async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "Missing prompt" });
-    }
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
+        process.env.GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+        }),
+      }
+    );
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const data = await response.json();
 
-    const result = await model.generateContent(prompt);
+    // ✅ Extract only the text
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response generated.";
 
-    res.json({ text: result.response.text() });
-  } catch (err) {
-    console.error("Gemini error:", err);
-    res
-      .status(500)
-      .json({ error: "Gemini request failed", details: String(err) });
+    // ✅ Send cleaned JSON to frontend
+    res.json({ text });
+  } catch (error) {
+    console.error("Gemini request failed:", error);
+    res.status(500).json({ error: "Gemini request failed" });
   }
 });
 

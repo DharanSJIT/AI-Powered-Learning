@@ -15,22 +15,20 @@ import TodoList from "./components/TodoList";
 import ChatAssistant from "./components/ChatAssistant";
 import ProgressTracker from "./components/ProgressTracker";
 import Bookmarks from "./components/Bookmarks";
-import Settings from "./components/Settings";
+import Settings from "./components/Settings"; 
 import Notes from "./components/Notes"; // Learning Resources (Notes) component
 import Summarization from "./components/Summarization"; // Summarization component
 
 export default function App() {
-  const [user] = useAuthState(auth);  // Firebase Auth state hook
-  const [toast, setToast] = useState({ message: "", type: "" });  // Toast notifications
-  const [darkMode, setDarkMode] = useState(false);  // Dark mode state
+  const [user] = useAuthState(auth);
+  const [toast, setToast] = useState({ message: "", type: "" });
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Function to show toast notification
   const showToast = (message, type) => {
     setToast({ message, type });
-    setTimeout(() => setToast({ message: "", type: "" }), 3000);  // Clear toast after 3 seconds
+    setTimeout(() => setToast({ message: "", type: "" }), 3000);
   };
 
-  // Login function using Google Auth
   const handleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -42,7 +40,6 @@ export default function App() {
     }
   };
 
-  // Logout function
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -57,20 +54,19 @@ export default function App() {
   const handleThemeChange = () => {
     setDarkMode(!darkMode);
     if (!darkMode) {
-      document.documentElement.classList.add("dark");  // Apply dark theme globally
-      localStorage.setItem("theme", "dark");  // Save the preference in localStorage
+      document.documentElement.classList.add("dark"); // Apply dark class to the html element
+      localStorage.setItem("theme", "dark"); // Save preference in localStorage
     } else {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
   };
 
-  // On initial load, check if a theme is saved in localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
       setDarkMode(true);
-      document.documentElement.classList.add("dark");  // Apply dark mode if preference is saved
+      document.documentElement.classList.add("dark"); // Apply dark mode globally if saved preference is dark
     }
   }, []);
 
@@ -100,7 +96,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Toast Notification */}
+      {/* ✅ Toast Notification */}
       {toast.message && (
         <div
           className={`fixed right-4 top-[60px] px-4 py-2 rounded-lg shadow-lg text-white transition-all duration-500 ease-in-out z-50
@@ -110,11 +106,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Routes for Navigation */}
+      {/* ✅ Routes */}
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/home" element={<DashboardGrid user={user} />} />
-
         {/* 🧩 Tool Routes */}
         <Route path="/learning-path" element={<LearningPath />} />
         <Route path="/quiz-generator" element={<QuizGenerator />} />
@@ -122,9 +117,9 @@ export default function App() {
         <Route path="/mentor" element={<ChatAssistant user={user} />} />
         <Route path="/progress-tracker" element={<ProgressTracker />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/notes" element={<Notes />} />  {/* Learning Resources (Notes) Route */}
-        <Route path="/summarization" element={<Summarization />} />  {/* Summarization Route */}
-        <Route path="/settings" element={<Settings onThemeChange={handleThemeChange} />} />  {/* Pass theme handler */}
+        <Route path="/notes" element={<Notes />} /> {/* Learning Resources (Notes) Route */}
+        <Route path="/summarization" element={<Summarization />} /> {/* Summarization Route */}
+        <Route path="/settings" element={<Settings onThemeChange={handleThemeChange} />} /> {/* Pass theme handler */}
       </Routes>
 
       {/* Fixed Theme Toggle Button at the Bottom Right */}
@@ -134,9 +129,9 @@ export default function App() {
         title="Toggle Dark Mode"
       >
         {darkMode ? (
-          <span className="text-lg font-semibold">🌙</span>  
+          <span className="text-lg font-semibold">🌙</span>
         ) : (
-          <span className="text-lg font-semibold">🌞</span> 
+          <span className="text-lg font-semibold">🌞</span>
         )}
       </button>
     </Router>
