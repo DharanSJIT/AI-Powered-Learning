@@ -16,28 +16,62 @@ const UdemyResources = () => {
     setLoading(true);
 
     // Example placeholder - Replace with Udemy API call if available
+    // const fetchedResources = [
+    //   {
+    //     title: "React for Beginners",
+    //     url: "https://www.udemy.com/course/react-for-beginners/",
+    //     category: "Web Development",
+    //   },
+    //   {
+    //     title: "JavaScript Essentials",
+    //     url: "https://www.udemy.com/course/javascript-essentials/",
+    //     category: "Programming",
+    //   },
+    //   {
+    //     title: "Python Data Science Masterclass",
+    //     url: "https://www.udemy.com/course/python-data-science/",
+    //     category: "Data Science",
+    //   },
+    //   {
+    //     title: "Java Programming Masterclass",
+    //     url: "https://www.udemy.com/course/java-the-complete-java-developer-course/",
+    //     category: "Programming",
+    //   },
+    // ];
+
     const fetchedResources = [
-      {
-        title: "React for Beginners",
-        url: "https://www.udemy.com/course/react-for-beginners/",
-        category: "Web Development",
-      },
-      {
-        title: "JavaScript Essentials",
-        url: "https://www.udemy.com/course/javascript-essentials/",
-        category: "Programming",
-      },
-      {
-        title: "Python Data Science Masterclass",
-        url: "https://www.udemy.com/course/python-data-science/",
-        category: "Data Science",
-      },
-      {
-        title: "Java Programming Masterclass",
-        url: "https://www.udemy.com/course/java-the-complete-java-developer-course/",
-        category: "Programming",
-      },
-    ];
+  {
+    title: "React for Beginners",
+    url: "https://www.udemy.com/course/react-for-beginners/",
+    category: "Web Development",
+  },
+  {
+    title: "JavaScript Essentials",
+    url: "https://www.udemy.com/course/javascript-essentials/",
+    category: "Programming",
+  },
+  {
+    title: "Python Data Science Masterclass",
+    url: "https://www.udemy.com/course/python-data-science/",
+    category: "Data Science",
+  },
+  {
+    title: "Java Programming Masterclass",
+    url: "https://www.udemy.com/course/java-the-complete-java-developer-course/",
+    category: "Programming",
+  },
+  {
+    title: "CSS - The Complete Guide",
+    url: "https://www.udemy.com/course/css-the-complete-guide/",
+    category: "Web Development",
+  },
+  {
+    title: "Node.js - The Complete Guide",
+    url: "https://www.udemy.com/course/nodejs-the-complete-guide/",
+    category: "Backend Development",
+  },
+];
+
 
     setResources(fetchedResources);
     setFilteredResources(fetchedResources);

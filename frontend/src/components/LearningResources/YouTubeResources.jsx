@@ -11,7 +11,7 @@ const YouTubeResources = ({ query }) => {
 
   // API key (move to .env in real projects)
   const apiKey = "AIzaSyCz6hq9UR-LAl_Ivk9USsQyT3O_ha6imSY";
-  const maxResults = 5;
+  const maxResults = 6;
 
   // Debounced search function
   const debouncedSearch = useMemo(
