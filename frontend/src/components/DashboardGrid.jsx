@@ -17,12 +17,13 @@ export default function DashboardGrid({ user }) {
       route: "/quiz-generator",
       color: "bg-orange-500",
     },
-    {
+     {
       id: 3,
-      label: "To-Do List",
-      route: "/todo-list",
-      color: "bg-indigo-600",
+      label: "Learning Resources",
+      route: "/notes",
+      color: "bg-teal-500",
     },
+    
     {
       id: 4,
       label: "Summarization",
@@ -49,10 +50,11 @@ export default function DashboardGrid({ user }) {
     },
     {
       id: 8,
-      label: "Notes",
-      route: "/notes",
-      color: "bg-teal-500",
+      label: "To-Do List",
+      route: "/todo-list",
+      color: "bg-indigo-600",
     },
+   
     {
       id: 9,
       label: "Settings",

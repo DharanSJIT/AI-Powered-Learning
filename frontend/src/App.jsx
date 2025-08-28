@@ -11,12 +11,13 @@ import Welcome from "./pages/Welcome";
 import DashboardGrid from "./components/DashboardGrid";
 import LearningPath from "./components/LearningPath";
 import QuizGenerator from "./components/QuizGenerator";
+import Notes from "./components/Notes"; 
 import TodoList from "./components/TodoList";
 import ChatAssistant from "./components/ChatAssistant";
 import ProgressTracker from "./components/ProgressTracker";
 import Bookmarks from "./components/Bookmarks";
 import Settings from "./components/Settings"; 
-import Notes from "./components/Notes"; // Learning Resources (Notes) component
+// Learning Resources (Notes) component
 import Summarization from "./components/Summarization"; // Summarization component
 
 export default function App() {
@@ -113,11 +114,12 @@ export default function App() {
         {/* 🧩 Tool Routes */}
         <Route path="/learning-path" element={<LearningPath />} />
         <Route path="/quiz-generator" element={<QuizGenerator />} />
+         <Route path="/notes" element={<Notes />} /> 
         <Route path="/todo-list" element={<TodoList />} />
         <Route path="/mentor" element={<ChatAssistant user={user} />} />
         <Route path="/progress-tracker" element={<ProgressTracker />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/notes" element={<Notes />} /> {/* Learning Resources (Notes) Route */}
+       {/* Learning Resources (Notes) Route */}
         <Route path="/summarization" element={<Summarization />} /> {/* Summarization Route */}
         <Route path="/settings" element={<Settings onThemeChange={handleThemeChange} />} /> {/* Pass theme handler */}
       </Routes>

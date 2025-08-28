@@ -16,7 +16,7 @@ const Notes = () => {
       </h2>
 
       {/* Grid Layout for 6 Learning Resources */}
-      <div className="grid grid-cols-1 sm:grid-cols-2  gap-8">
+      <div className="grid grid-cols-1   gap-8">
         
         {/* YouTube Resources */}
         <div className="flex flex-col bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
