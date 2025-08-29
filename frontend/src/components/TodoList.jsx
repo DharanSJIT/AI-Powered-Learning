@@ -1,267 +1,244 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
 
 export default function AI_TodoList() {
-  const [task, setTask] = useState("");
-  const [priority, setPriority] = useState("Medium");
+  const [taskText, setTaskText] = useState("");
+  const [query, setQuery] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [tasks, setTasks] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editingTask, setEditingTask] = useState({});
-  const [filter, setFilter] = useState("All");
-  const [search, setSearch] = useState("");
 
-  // Add Task
+  // Add new task
   const addTask = () => {
-    if (!task.trim()) return;
-
-    const newTask = {
-      text: task,
-      completed: false,
-      priority,
-      dueDate,
-      id: Date.now(),
-    };
-
-    setTasks([newTask, ...tasks]);
-    setTask("");
-    setPriority("Medium");
+    if (!taskText.trim()) return;
+    setTasks([
+      ...tasks,
+      {
+        id: Date.now(),
+        text: taskText,
+        query,
+        imageUrl,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        aiContent: "",
+        completed: false,
+        loading: "",
+      },
+    ]);
+    setTaskText("");
+    setQuery("");
+    setImageUrl("");
     setDueDate("");
   };
 
-  // Delete Task
+  // Delete task
   const deleteTask = (id) => {
     setTasks(tasks.filter((t) => t.id !== id));
-    if (editingIndex !== null && tasks[editingIndex]?.id === id) {
-      cancelEdit();
+  };
+
+  // Toggle completion
+  const toggleCompletion = (id) => {
+    setTasks(tasks.map((t) =>
+      t.id === id ? { ...t, completed: !t.completed } : t
+    ));
+  };
+
+  // Countdown timer
+  const getRemainingTime = (due) => {
+    if (!due) return "No deadline";
+    const now = new Date();
+    const diff = new Date(due) - now;
+    if (diff <= 0) return "Overdue";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    return `${days}d ${hours}h ${minutes}m`;
+  };
+
+  // Force re-render every minute to update timers
+  useEffect(() => {
+    const interval = setInterval(() => setTasks((t) => [...t]), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Analyze task with Gemini
+  const analyzeTask = async (taskId) => {
+    setTasks(tasks.map((t) =>
+      t.id === taskId ? { ...t, loading: "Analysing..." } : t
+    ));
+
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    try {
+      const res = await fetch("http://localhost:4000/api/gemini/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: task.query })
+      });
+      const data = await res.json();
+      const cleanText = data.text.replace(/\*/g, "");
+      setTasks(tasks.map((t) =>
+        t.id === taskId ? { ...t, aiContent: cleanText, loading: "" } : t
+      ));
+    } catch (err) {
+      console.error("Gemini API Error:", err);
+      setTasks(tasks.map((t) =>
+        t.id === taskId ? { ...t, loading: "Error" } : t
+      ));
     }
   };
 
-  // Edit Task
-  const startEditing = (taskItem, index) => {
-    setEditingIndex(index);
-    setEditingTask({ ...taskItem });
-  };
+  // Summarize AI content
+  const summarizeTask = async (taskId) => {
+    setTasks(tasks.map((t) =>
+      t.id === taskId ? { ...t, loading: "Summarizing..." } : t
+    ));
 
-  const saveEdit = (id) => {
-    setTasks(tasks.map((t) => (t.id === id ? editingTask : t)));
-    cancelEdit();
-  };
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || !task.aiContent) return;
 
-  const cancelEdit = () => {
-    setEditingIndex(null);
-    setEditingTask({});
+    try {
+      const res = await fetch("http://localhost:4000/api/gemini/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: task.aiContent })
+      });
+      const data = await res.json();
+      const cleanSummary = data.summary.replace(/\*/g, "");
+      setTasks(tasks.map((t) =>
+        t.id === taskId ? { ...t, aiContent: cleanSummary, loading: "" } : t
+      ));
+    } catch (err) {
+      console.error("Gemini Summarize Error:", err);
+      setTasks(tasks.map((t) =>
+        t.id === taskId ? { ...t, loading: "Error" } : t
+      ));
+    }
   };
-
-  // Toggle Completion
-  const toggleCompletion = (id) => {
-    setTasks(
-      tasks.map((t) =>
-        t.id === id ? { ...t, completed: !t.completed } : t
-      )
-    );
-  };
-
-  // Clear Completed
-  const clearCompleted = () => {
-    setTasks(tasks.filter((t) => !t.completed));
-  };
-
-  // Filtered & Searched Tasks
-  const displayedTasks = tasks.filter((t) => {
-    if (filter === "Completed") return t.completed;
-    if (filter === "Pending") return !t.completed;
-    if (filter === "High") return t.priority === "High";
-    return true;
-  }).filter((t) => t.text.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-lg max-w-3xl mx-auto mt-10">
-      {/* Back Link */}
-      <Link
-        to="/home"
-        className="inline-block mb-4 text-sm text-blue-600 hover:underline"
-      >
-        ← Back to Dashboard
-      </Link>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        <Link to="/home" className="text-blue-600 hover:underline mb-4 inline-block">
+          ← Back to Dashboard
+        </Link>
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
+          🤖 AI Powered To-Do List
+        </h2>
 
-      <h2 className="font-bold text-2xl text-slate-800 mb-4">
-        🤖 AI-Powered To-Do List
-      </h2>
+        {/* Input Section */}
+        <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 flex flex-col gap-3">
+          <input
+            type="text"
+            value={taskText}
+            onChange={(e) => setTaskText(e.target.value)}
+            placeholder="Task title..."
+            className="px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="AI query..."
+            className="px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <input
+            type="text"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="Image URL..."
+            className="px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <button
+            onClick={addTask}
+            className="mt-2 px-6 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all"
+          >
+            Add Task
+          </button>
+        </div>
 
-      {/* Input Section */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-4 items-center">
-        <input
-          type="text"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="Add a task..."
-          className="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          className="px-3 py-2 border rounded-xl focus:outline-none"
-        >
-          <option>High</option>
-          <option>Medium</option>
-          <option>Low</option>
-        </select>
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="px-3 py-2 border rounded-xl focus:outline-none"
-        />
-        <button
-          onClick={addTask}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
-        >
-          Add
-        </button>
-      </div>
-
-      {/* Search & Filter */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-2 border rounded-xl focus:outline-none"
-        >
-          <option>All</option>
-          <option>Completed</option>
-          <option>Pending</option>
-          <option>High</option>
-        </select>
-        <button
-          onClick={clearCompleted}
-          className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
-        >
-          Clear Completed
-        </button>
-      </div>
-
-      {/* Task List */}
-      {displayedTasks.length > 0 ? (
-        <ul className="space-y-3">
-          {displayedTasks.map((taskItem, i) => (
+        {/* Tasks */}
+        <ul className="space-y-6">
+          {tasks.map((t) => (
             <li
-              key={taskItem.id}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-slate-50 rounded-lg border hover:shadow-md transition"
+              key={t.id}
+              className={`bg-white shadow-md rounded-2xl p-5 flex flex-col gap-3 border-l-4 ${t.completed ? "border-green-400" : "border-indigo-400"}`}
             >
-              {editingIndex === i ? (
-                <div className="flex flex-col sm:flex-row gap-2 w-full">
-                  <input
-                    type="text"
-                    value={editingTask.text}
-                    onChange={(e) =>
-                      setEditingTask({ ...editingTask, text: e.target.value })
-                    }
-                    className="flex-1 px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <select
-                    value={editingTask.priority}
-                    onChange={(e) =>
-                      setEditingTask({ ...editingTask, priority: e.target.value })
-                    }
-                    className="px-2 py-1 border rounded-md"
-                  >
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={editingTask.dueDate}
-                    onChange={(e) =>
-                      setEditingTask({ ...editingTask, dueDate: e.target.value })
-                    }
-                    className="px-2 py-1 border rounded-md"
-                  />
+              <div className="flex justify-between items-center">
+                <h3 className={`text-lg font-bold ${t.completed ? "line-through text-gray-400" : "text-gray-800"}`}>
+                  {t.text}
+                </h3>
+                <div className="flex gap-2">
                   <button
-                    onClick={() => saveEdit(taskItem.id)}
-                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
+                    onClick={() => toggleCompletion(t.id)}
+                    className={`px-3 py-1 rounded-lg text-white font-medium ${t.completed ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"}`}
                   >
-                    Save
+                    {t.completed ? "Undo" : "Complete"}
                   </button>
                   <button
-                    onClick={cancelEdit}
-                    className="px-2 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 text-xs"
+                    onClick={() => deleteTask(t.id)}
+                    className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium"
                   >
-                    Cancel
+                    Delete
                   </button>
                 </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row w-full sm:items-center justify-between">
-                  <div>
-                    <span
-                      className={`text-sm font-medium ${
-                        taskItem.completed ? "line-through text-gray-400" : ""
-                      }`}
-                    >
-                      {taskItem.text}
-                    </span>
-                    <div className="text-xs mt-1 flex gap-2">
-                      <span
-                        className={`px-2 py-0.5 rounded text-white ${
-                          taskItem.priority === "High"
-                            ? "bg-red-500"
-                            : taskItem.priority === "Medium"
-                            ? "bg-yellow-400"
-                            : "bg-green-500"
-                        }`}
-                      >
-                        {taskItem.priority}
-                      </span>
-                      {taskItem.dueDate && (
-                        <span className="text-gray-500">
-                          Due: {format(new Date(taskItem.dueDate), "dd MMM yyyy")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-2 sm:mt-0">
-                    <button
-                      onClick={() => toggleCompletion(taskItem.id)}
-                      className={`px-2 py-1 rounded text-xs ${
-                        taskItem.completed
-                          ? "bg-gray-400 text-white"
-                          : "bg-green-500 text-white hover:bg-green-600"
-                      }`}
-                    >
-                      {taskItem.completed ? "Undo" : "Complete"}
-                    </button>
-                    <button
-                      onClick={() => startEditing(taskItem, i)}
-                      className="px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-xs"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteTask(taskItem.id)}
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
-                    >
-                      Delete
-                    </button>
-                  </div>
+              </div>
+
+              {t.imageUrl && (
+                <img src={t.imageUrl} alt="Task" className="w-full max-w-sm rounded-xl shadow-sm" />
+              )}
+
+              <div className="text-sm text-gray-500">
+                ⏱ Timer: {getRemainingTime(t.dueDate)}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                <input
+                  type="text"
+                  value={t.query}
+                  onChange={(e) => setTasks(tasks.map(taskItem =>
+                    taskItem.id === t.id ? { ...taskItem, query: e.target.value } : taskItem
+                  ))}
+                  placeholder="Edit AI query..."
+                  className="flex-1 px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+                <button
+                  onClick={() => analyzeTask(t.id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-all"
+                >
+                  Analyze with AI
+                </button>
+                {t.aiContent && (
+                  <button
+                    onClick={() => summarizeTask(t.id)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-medium transition-all"
+                  >
+                    Summarize
+                  </button>
+                )}
+              </div>
+
+              {/* Loading / Status */}
+              {t.loading && (
+                <div className="mt-2 text-sm text-gray-500 italic">{t.loading}</div>
+              )}
+
+              {/* AI content */}
+              {t.aiContent && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-xl text-sm whitespace-pre-wrap border border-gray-200">
+                  {t.aiContent}
                 </div>
               )}
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-slate-500 text-sm mt-4">
-          No tasks yet. Add one above! ✍️
-        </p>
-      )}
+      </div>
     </div>
   );
 }
