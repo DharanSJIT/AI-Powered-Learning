@@ -10,13 +10,15 @@ export default function QuizGenerator() {
   const number = 10;
 
   const generateQuiz = async () => {
-    if (!topic) {
+    if (!topic.trim()) {
       setQuiz("⚠️ Please enter a topic to generate quiz.");
       return;
     }
 
     setLoading(true);
     setAnswers({});
+    setQuiz(null);
+
     try {
       const prompt = `Generate a ${number}-question multiple-choice quiz on ${topic}.
       Each question should have exactly 4 options and 1 correct answer.
@@ -47,7 +49,7 @@ export default function QuizGenerator() {
       setQuiz(parsed);
     } catch (e) {
       console.error("Quiz error:", e);
-      setQuiz("❌ Failed to generate quiz");
+      setQuiz("❌ Failed to generate quiz.");
     } finally {
       setLoading(false);
     }
@@ -58,110 +60,217 @@ export default function QuizGenerator() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto mt-[20px]">
-      {/* 🔙 Back to Dashboard */}
+    <div className="max-w-4xl mx-auto p-6 mt-10">
+      {/* Back Link */}
       <Link
         to="/home"
-        className="inline-block mb-4 text-sm text-blue-600 hover:underline"
+        className="inline-flex items-center text-blue-600 hover:underline mb-8 font-semibold"
       >
         ← Back to Dashboard
       </Link>
 
       {/* Header */}
-      <h2 className="font-bold text-2xl text-slate-800 mb-4 flex items-center gap-2">
-        📝 Quiz Generator
+      <h2 className="text-3xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
+        <span className="text-2xl">📝</span> Quiz Generator
       </h2>
 
-      {/* Input + Button */}
-      <div className="flex w-full gap-2 mb-4">
+      {/* Input & Generate Button */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <input
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Enter a topic (e.g. JavaScript, Machine Learning)"
-          className="flex-1 px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="
+            flex-1
+            rounded-xl
+            border
+            border-gray-300
+            px-5
+            py-3
+            text-gray-900
+            placeholder-gray-400
+            focus:outline-none
+            focus:ring-2
+            focus:ring-green-500
+            focus:border-transparent
+            transition
+          "
+          autoComplete="off"
         />
         <button
           onClick={generateQuiz}
           disabled={loading}
-          className="flex-shrink-0 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
+          className="
+            flex-shrink-0
+            rounded-xl
+            bg-green-600
+            px-6
+            py-3
+            text-white
+            font-semibold
+            shadow-md
+            hover:bg-green-700
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            transition
+            flex
+            items-center
+            justify-center
+            gap-2
+          "
+          aria-label="Generate Quiz"
         >
-          {loading ? "..." : "Generate"}
+          {loading && (
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+          )}
+          {loading ? "Generating..." : "Generate"}
         </button>
       </div>
 
-      {/* Loader */}
-      {loading && (
-        <div className="flex items-center gap-2 text-slate-500 mb-4">
-          <svg
-            className="animate-spin h-5 w-5 text-green-600"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            ></path>
-          </svg>
-          Generating your quiz...
-        </div>
-      )}
-
-      {/* Quiz */}
+      {/* Quiz Content */}
       {Array.isArray(quiz) && quiz.length > 0 && (
-        <div className="space-y-6">
-          {quiz.map((q, i) => (
-            <div key={i} className="p-4 border rounded-xl bg-slate-50 shadow-sm">
-              <p className="font-medium mb-3 text-slate-800">
-                {i + 1}. {q.question}
-              </p>
-              <div className="space-y-2">
-                {q.options.map((opt, j) => {
-                  const selected = answers[i];
-                  const isCorrect = selected && opt === q.answer;
-                  const isWrong = selected === opt && selected !== q.answer;
-
-                  return (
-                    <button
-                      key={j}
-                      onClick={() => handleAnswer(i, opt)}
-                      disabled={!!selected} // disable after choosing
-                      className={`block w-full text-left px-4 py-2 rounded-lg border transition 
-                        ${
-                          isCorrect
-                            ? "bg-green-100 border-green-600 text-green-800"
-                            : isWrong
-                            ? "bg-red-100 border-red-600 text-red-800"
-                            : "hover:bg-slate-100 border-slate-300"
-                        }`}
-                    >
-                      {opt}
-                      {isCorrect && " ✅"}
-                      {isWrong && " ❌"}
-                    </button>
-                  );
-                })}
+        <div className="space-y-8">
+          {quiz.map((q, i) => {
+            const selected = answers[i];
+            return (
+              <div
+                key={i}
+                className="
+                  p-6
+                  bg-white
+                  rounded-2xl
+                  shadow-lg
+                  border
+                  border-gray-200
+                  transition
+                  hover:shadow-xl
+                "
+              >
+                <p className="font-semibold text-lg text-gray-900 mb-4">
+                  {i + 1}. {q.question}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {q.options.map((opt, j) => {
+                    const isCorrect = selected && opt === q.answer;
+                    const isWrong = selected === opt && selected !== q.answer;
+                    const disabled = !!selected;
+                    return (
+                      <button
+                        key={j}
+                        onClick={() => handleAnswer(i, opt)}
+                        disabled={disabled}
+                        className={`
+                          flex items-center justify-between
+                          w-full
+                          px-5
+                          py-3
+                          rounded-xl
+                          border
+                          font-medium
+                          transition
+                          cursor-pointer
+                          select-none
+                          ${
+                            isCorrect
+                              ? "bg-green-100 border-green-500 text-green-700"
+                              : isWrong
+                              ? "bg-red-100 border-red-500 text-red-700"
+                              : "bg-white border-gray-300 text-gray-800 hover:bg-gray-50"
+                          }
+                          ${disabled ? "cursor-not-allowed opacity-70" : "hover:scale-[1.03]"}
+                        `}
+                        aria-pressed={selected === opt}
+                        aria-disabled={disabled}
+                      >
+                        <span>{opt}</span>
+                        {isCorrect && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-green-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                        {isWrong && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-red-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Errors / Messages */}
+      {/* Message / Error */}
       {!loading && typeof quiz === "string" && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <div
+          className="
+            mt-6
+            p-4
+            rounded-lg
+            bg-red-50
+            border
+            border-red-200
+            text-red-700
+            font-medium
+            text-center
+          "
+          role="alert"
+        >
           {quiz}
         </div>
+      )}
+
+      {/* Placeholder message when no quiz */}
+      {!loading && quiz === null && (
+        <p className="text-center text-gray-400 mt-8 select-none">
+          Enter a topic above and click generate to get a quiz.
+        </p>
       )}
     </div>
   );
