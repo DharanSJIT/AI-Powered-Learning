@@ -84,6 +84,15 @@ export default function DashboardGrid({ user }) {
   badge: "Personalize"
 },
  {
+  id: 11,
+  label: "Document Analyzer",
+  route: "/document-analyzer",
+  gradient: "from-blue-500 to-indigo-600",
+  icon: FileText,
+  description: "Analyze and extract insights from documents",
+  badge: "AI-Powered"
+},
+ {
       id: 6,
       label: "Progress Tracker",
       route: "/progress-tracker",
@@ -133,15 +142,8 @@ export default function DashboardGrid({ user }) {
       description: "Customize your experience",
       badge: "Personalize"
     },
-    {
-      id: 10,
-      label: "DocumentAnalyzer",
-      route: "/document-analyzer",
-      gradient: "from-gray-600 to-gray-800",
-      icon: Settings,
-      description: "Customize your experience",
-      badge: "Personalize"
-    },
+  
+
   ];
 
   const featuredTools = tools.filter(tool => tool.featured);
