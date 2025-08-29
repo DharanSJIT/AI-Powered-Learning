@@ -73,24 +73,24 @@ export default function DashboardGrid({ user }) {
       badge: "Smart",
       featured: true
     },
-    {
-      id: 5,
+   
+      {
+  id: 5,
+  label: "Image Analysis",
+  route: "/image-analysis",
+  gradient: "from-red-400 to-pink-600",
+  icon: Settings,
+  description: "Customize your experience",
+  badge: "Personalize"
+},
+ {
+      id: 6,
       label: "Progress Tracker",
       route: "/progress-tracker",
       gradient: "from-purple-500 to-violet-600",
       icon: TrendingUp,
       description: "Monitor your learning progress",
       badge: "Analytics"
-    },
-    {
-      id: 6,
-      label: "AI Mentor",
-      route: "/mentor",
-      gradient: "from-green-400 to-emerald-600",
-      icon: Users,
-      description: "Get personalized guidance",
-      badge: "24/7 Support",
-      featured: true
     },
     {
       id: 7,
@@ -101,7 +101,7 @@ export default function DashboardGrid({ user }) {
       description: "Save important resources",
       badge: "Quick Access"
     },
-    {
+     {
       id: 8,
       label: "To-Do List",
       route: "/todo-list",
@@ -110,10 +110,33 @@ export default function DashboardGrid({ user }) {
       description: "Manage your tasks efficiently",
       badge: "Productivity"
     },
+  
     {
       id: 9,
+      label: "AI Mentor",
+      route: "/mentor",
+      gradient: "from-green-400 to-emerald-600",
+      icon: Users,
+      description: "Get personalized guidance",
+      badge: "24/7 Support",
+      featured: true
+    },
+    
+   
+
+    {
+      id: 10,
       label: "Settings",
       route: "/settings",
+      gradient: "from-gray-600 to-gray-800",
+      icon: Settings,
+      description: "Customize your experience",
+      badge: "Personalize"
+    },
+    {
+      id: 10,
+      label: "DocumentAnalyzer",
+      route: "/document-analyzer",
       gradient: "from-gray-600 to-gray-800",
       icon: Settings,
       description: "Customize your experience",
@@ -125,8 +148,8 @@ export default function DashboardGrid({ user }) {
   const regularTools = tools.filter(tool => !tool.featured);
 
   const stats = [
-    { label: "Tools Available", value: "9", icon: Zap },
-    { label: "AI Features", value: "4", icon: Brain },
+    { label: "Tools Available", value: "10", icon: Zap },
+    { label: "AI Features", value: "5", icon: Brain },
     { label: "Your Progress", value: "75%", icon: Target }
   ];
 

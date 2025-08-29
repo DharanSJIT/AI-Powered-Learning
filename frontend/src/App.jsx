@@ -17,8 +17,9 @@ import ChatAssistant from "./components/ChatAssistant";
 import ProgressTracker from "./components/ProgressTracker";
 import Bookmarks from "./components/Bookmarks";
 import Settings from "./components/Settings"; 
-// Learning Resources (Notes) component
 import Summarization from "./components/Summarization"; // Summarization component
+import ImageExplanation from "./components/ImageExplanation"; // Image Analysis component
+import DocumentAnalyzer from "./components/DocumentAnalyzer";
 
 export default function App() {
   const [user] = useAuthState(auth);
@@ -114,13 +115,15 @@ export default function App() {
         {/* 🧩 Tool Routes */}
         <Route path="/learning-path" element={<LearningPath />} />
         <Route path="/quiz-generator" element={<QuizGenerator />} />
-         <Route path="/notes" element={<Notes />} /> 
+        <Route path="/notes" element={<Notes />} /> 
         <Route path="/todo-list" element={<TodoList />} />
         <Route path="/mentor" element={<ChatAssistant user={user} />} />
         <Route path="/progress-tracker" element={<ProgressTracker />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
-       {/* Learning Resources (Notes) Route */}
+        {/* Learning Resources Routes */}
         <Route path="/summarization" element={<Summarization />} /> {/* Summarization Route */}
+        <Route path="/image-analysis" element={<ImageExplanation />} /> {/* Image Analysis Route */}
+        <Route path="/document-analyzer" element={<DocumentAnalyzer />} />
         <Route path="/settings" element={<Settings onThemeChange={handleThemeChange} />} /> {/* Pass theme handler */}
       </Routes>
 
