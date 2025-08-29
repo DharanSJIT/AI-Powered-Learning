@@ -48,15 +48,18 @@ export default function ChatAssistant({ user }) {
     <div
       className={`${
         isFullPage ? "w-full h-[60vh] max-w-3xl mx-auto" : "w-[22rem] sm:w-[26rem] h-[36rem]"
-      } flex flex-col bg-white rounded-2xl shadow-xl border overflow-hidden`}
+      } flex flex-col bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden`}
     >
+      
       {/* Header */}
-      <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-50">
-        <h2 className="text-lg font-semibold text-slate-800">🎓 AI Mentor</h2>
+      <div className="flex justify-between items-center px-4 py-3 border-b bg-gradient-to-r from-slate-50 to-white">
+        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+          🎓 <span>AI Mentor</span>
+        </h2>
         {!isFullPage && (
           <button
             onClick={() => setIsOpen(false)}
-            className="text-slate-500 hover:text-slate-800 text-xl"
+            className="text-slate-500 hover:text-red-500 transition text-xl"
             title="Close"
           >
             ✖
@@ -72,70 +75,58 @@ export default function ChatAssistant({ user }) {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[75%] px-4 py-2 text-sm rounded-xl shadow ${
+              className={`max-w-[75%] px-4 py-2 text-sm whitespace-pre-wrap rounded-2xl shadow ${
                 msg.role === "user"
-                  ? "bg-blue-600 text-white rounded-br-none"
-                  : "bg-slate-100 text-slate-800 rounded-bl-none"
+                  ? "bg-blue-600 text-white rounded-br-none animate-fade-in"
+                  : "bg-slate-100 text-slate-800 rounded-bl-none animate-fade-in"
               }`}
             >
               {msg.text}
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="text-sm text-slate-500 animate-pulse">AI is typing...</div>
+        )}
         <div ref={chatEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-3 border-t bg-slate-50">
+      <div className="p-3 border-t bg-gradient-to-r from-slate-50 to-white">
         <div className="flex gap-2">
           <input
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            className="flex-1 px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 px-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition placeholder-slate-400"
             placeholder="Ask your AI mentor..."
           />
           <button
             onClick={send}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 transition"
           >
             {loading ? "..." : "Send"}
           </button>
         </div>
       </div>
 
-      {/* Back to Dashboard link */}
-      {isFullPage && (
-        <div className="absolute top-[70px] left-4">
-          <Link
-            to="/home"
-            className="text-blue-600 hover:underline text-sm font-medium"
-          >
-            ← Back to Dashboard
-          </Link>
-        </div>
-      )}
+      {/* Back link */}
+     
     </div>
   );
 
-  // Full-page layout
-  if (isFullPage) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-100 flex items-center justify-center p-4">
-        {ChatUI}
-      </div>
-    );
-  }
-
-  // Floating widget layout
-  return (
+  return isFullPage ? (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-100 flex items-center justify-center p-4">
+      {ChatUI}
+    </div>
+  ) : (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center transition transform hover:scale-105"
           title="Open AI Mentor"
         >
           🎓

@@ -103,7 +103,7 @@ export default function DashboardGrid({ user }) {
     },
     {
       id: 7,
-      label: "Bookmarks",
+      label: "Bookbank",
       route: "/bookmarks",
       gradient: "from-rose-400 to-pink-500",
       icon: Bookmark,
