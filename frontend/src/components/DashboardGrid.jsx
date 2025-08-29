@@ -150,8 +150,8 @@ export default function DashboardGrid({ user }) {
   const regularTools = tools.filter(tool => !tool.featured);
 
   const stats = [
-    { label: "Tools Available", value: "10", icon: Zap },
-    { label: "AI Features", value: "5", icon: Brain },
+    { label: "Tools Available", value: "11", icon: Zap },
+    { label: "AI Features", value: "6", icon: Brain },
     { label: "Your Progress", value: "75%", icon: Target }
   ];
 
