@@ -22,19 +22,18 @@ export default function ImageExplanation() {
   const [previewUrl, setPreviewUrl] = useState("");
   const fileInputRef = useRef(null);
 
-  // Initialize Gemini API
-  const genAI = new GoogleGenerativeAI("AIzaSyDQcCivZyB0iFzpZlQzK6fQSKGFw4yQlvU"); // replace with your actual API key
+  // ✅ Use env variable for API key (create .env with VITE_GEMINI_API_KEY)
+  // const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+  const genAI = new GoogleGenerativeAI("AIzaSyBPKsT752lekwd_w5R0kPF0dksy-fFGD00");
 
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewUrl(e.target.result);
-      };
+      reader.onload = (e) => setPreviewUrl(e.target.result);
       reader.readAsDataURL(selectedFile);
-      setUrl(""); // Clear URL when file is selected
+      setUrl(""); // clear URL if file is uploaded
     }
   };
 
@@ -57,56 +56,70 @@ export default function ImageExplanation() {
       reader.readAsDataURL(file);
     });
   };
-const runExplain = async () => {
-  try {
-    setLoading(true);
-    setResponse("");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // ✅ safer conversion for remote image URL
+  const fetchImageAsBase64 = async (imageUrl) => {
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result.split(",")[1];
+        resolve({ base64String, mimeType: blob.type || "image/jpeg" });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
 
-    let imageData;
-    let mimeType;
+  const runExplain = async () => {
+    try {
+      setLoading(true);
+      setResponse("");
 
-    if (file) {
-      imageData = await convertFileToBase64(file);
-      mimeType = file.type;
-    } else if (url) {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const arrayBuffer = await blob.arrayBuffer();
-      imageData = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      mimeType = blob.type || "image/jpeg";
-    }
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const result = await model.generateContent([
-      { text: prompt },
-      {
-        inlineData: {
-          mimeType: mimeType,
-          data: imageData,
+      let imageData;
+      let mimeType;
+
+      if (file) {
+        imageData = await convertFileToBase64(file);
+        mimeType = file.type;
+      } else if (url) {
+        const { base64String, mimeType: type } = await fetchImageAsBase64(url);
+        imageData = base64String;
+        mimeType = type;
+      } else {
+        throw new Error("No image provided");
+      }
+
+      const result = await model.generateContent([
+        { text: prompt },
+        {
+          inlineData: {
+            mimeType,
+            data: imageData,
+          },
         },
-      },
-    ]);
+      ]);
 
-    const rawText = result.response.text();
+      const rawText = result.response.text();
 
-    // 🔧 Clean up text:
-    const cleanedText = rawText
-      // Remove bullets (starting with * or -)
-      .replace(/^\s*[*-]\s?/gm, "")
-      // Remove markdown bold (e.g. **text**)
-      .replace(/\*\*(.*?)\*\*/g, "$1");
+      // Clean response text
+      const cleanedText = rawText
+        .replace(/^\s*[*-]\s?/gm, "") // remove bullets
+        .replace(/\*\*(.*?)\*\*/g, "$1"); // remove markdown bold
 
-    setResponse(cleanedText);
-  } catch (error) {
-    console.error("Error analyzing image:", error);
-    setResponse(
-      "❌ Error: Could not process image. Please check your API key and try again."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      setResponse(cleanedText);
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      setResponse(
+        "❌ Error: Could not process image. Please check your API key and try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const copyToClipboard = async () => {
     try {
@@ -141,15 +154,9 @@ const runExplain = async () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            {/* <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div> */}
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-  Image Analyzer
-</h1>
-
-          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Image Analyzer
+          </h1>
           <p className="text-gray-600 text-lg">
             Upload an image or paste a URL to get detailed AI-powered analysis
           </p>
@@ -165,6 +172,7 @@ const runExplain = async () => {
                 Image Input
               </h3>
 
+              {/* File Upload */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Image File
@@ -266,7 +274,7 @@ const runExplain = async () => {
 
           {/* Right Panel */}
           <div className="space-y-6">
-            {/* Image Preview */}
+            {/* Preview */}
             {previewUrl && (
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -283,7 +291,7 @@ const runExplain = async () => {
               </div>
             )}
 
-            {/* AI Output */}
+            {/* AI Response */}
             {(response || loading) && (
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
@@ -326,43 +334,8 @@ const runExplain = async () => {
                 )}
               </div>
             )}
-
-            {/* How to Use */}
-            {!response && !loading && (
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-                <h3 className="text-lg font-semibold text-indigo-800 mb-3">
-                  How to use:
-                </h3>
-                <ul className="space-y-2 text-indigo-700">
-                  <li className="flex items-start gap-2">
-                    <span className="w-2 h-2 bg-indigo-400 rounded-full mt-2 flex-shrink-0"></span>
-                    Upload an image file or enter an image URL
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-2 h-2 bg-indigo-400 rounded-full mt-2 flex-shrink-0"></span>
-                    Choose a quick prompt or write your own
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="w-2 h-2 bg-indigo-400 rounded-full mt-2 flex-shrink-0"></span>
-                    Click "Analyze Image" to get AI-powered insights
-                  </li>
-                </ul>
-              </div>
-            )}
           </div>
         </div>
-
-        {/* API Key Notice */}
-        {/* <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <p className="text-sm text-yellow-800">
-            <strong>Note:</strong> Make sure to set your Gemini API key in your
-            environment variables as{" "}
-            <code className="bg-yellow-100 px-2 py-1 rounded mx-1">
-              REACT_APP_GEMINI_API_KEY
-            </code>
-            or replace "YOUR_API_KEY_HERE" in the code.
-          </p>
-        </div> */}
       </div>
     </div>
   );

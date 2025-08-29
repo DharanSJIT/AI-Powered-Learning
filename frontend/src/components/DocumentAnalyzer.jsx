@@ -33,7 +33,7 @@ export default function DocumentAnalyzer() {
   const fileInputRef = useRef(null);
 
   // Initialize Gemini API
-  const genAI = new GoogleGenerativeAI("AIzaSyDQcCivZyB0iFzpZlQzK6fQSKGFw4yQlvU");
+  const genAI = new GoogleGenerativeAI("AIzaSyBPKsT752lekwd_w5R0kPF0dksy-fFGD00");
 
   const handleFileUpload = async (e) => {
     const selectedFile = e.target.files[0];
