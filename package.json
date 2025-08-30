@@ -40,5 +40,10 @@
   "bugs": {
     "url": "https://github.com/dinesh2432/ai-personalized-learning/issues"
   },
-  "homepage": "https://github.com/dinesh2432/ai-personalized-learning#readme"
+  "homepage": "https://github.com/dinesh2432/ai-personalized-learning#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12"
+  }
 }

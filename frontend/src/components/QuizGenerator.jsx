@@ -7,7 +7,7 @@ export default function QuizGenerator() {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
-  const number = 10;
+  const number = 15;
 
   const generateQuiz = async () => {
     if (!topic.trim()) {
