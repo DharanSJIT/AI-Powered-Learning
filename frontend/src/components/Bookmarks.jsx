@@ -53,7 +53,7 @@ export default function Bookmarks() {
       </Link>
 
       <h2 className="text-3xl font-bold text-slate-800 mb-8 flex items-center gap-2">
-        🔖 Bookmarks
+        🔖 Bookbank
       </h2>
 
       {/* Input Form */}

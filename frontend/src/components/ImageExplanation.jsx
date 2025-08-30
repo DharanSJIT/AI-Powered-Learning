@@ -24,7 +24,7 @@ export default function ImageExplanation() {
 
   // ✅ Use env variable for API key (create .env with VITE_GEMINI_API_KEY)
   // const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-  const genAI = new GoogleGenerativeAI("AIzaSyDziVcYD65C81iRlZiscObcEj3GEpIKg8k");
+  const genAI = new GoogleGenerativeAI("AIzaSyDPn2YCGI44VPAbMyLNYCHzpVnsoe2xtKs");
 
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
